@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class User_model extends CI_Model {
+class User_model extends CI_Model
+{
 
     function __construct()
     {
@@ -11,11 +12,13 @@ class User_model extends CI_Model {
         $this->output->set_header('Pragma: no-cache');
     }
 
-    public function get_admin_details() {
+    public function get_admin_details()
+    {
         return $this->db->get_where('users', array('role_id' => 1));
     }
 
-    public function get_user($user_id = 0) {
+    public function get_user($user_id = 0)
+    {
         if ($user_id > 0) {
             $this->db->where('id', $user_id);
         }
@@ -23,18 +26,20 @@ class User_model extends CI_Model {
         return $this->db->get('users');
     }
 
-    public function get_all_user($user_id = 0) {
+    public function get_all_user($user_id = 0)
+    {
         if ($user_id > 0) {
             $this->db->where('id', $user_id);
         }
         return $this->db->get('users');
     }
 
-    public function add_user() {
+    public function add_user()
+    {
         $validity = $this->check_duplication('on_create', $this->input->post('email'));
         if ($validity == false) {
             $this->session->set_flashdata('error_message', get_phrase('email_duplication'));
-        }else {
+        } else {
             $data['first_name'] = html_escape($this->input->post('first_name'));
             $data['last_name'] = html_escape($this->input->post('last_name'));
             $data['email'] = html_escape($this->input->post('email'));
@@ -70,29 +75,31 @@ class User_model extends CI_Model {
         }
     }
 
-    public function check_duplication($action = "", $email = "", $user_id = "") {
+    public function check_duplication($action = "", $email = "", $user_id = "")
+    {
         $duplicate_email_check = $this->db->get_where('users', array('email' => $email));
 
         if ($action == 'on_create') {
             if ($duplicate_email_check->num_rows() > 0) {
                 return false;
-            }else {
+            } else {
                 return true;
             }
-        }elseif ($action == 'on_update') {
+        } elseif ($action == 'on_update') {
             if ($duplicate_email_check->num_rows() > 0) {
                 if ($duplicate_email_check->row()->id == $user_id) {
                     return true;
-                }else {
+                } else {
                     return false;
                 }
-            }else {
+            } else {
                 return true;
             }
         }
     }
 
-    public function edit_user($user_id = "") { // Admin does this editing
+    public function edit_user($user_id = "")
+    { // Admin does this editing
         $validity = $this->check_duplication('on_update', $this->input->post('email'), $user_id);
         if ($validity) {
             $data['first_name'] = html_escape($this->input->post('first_name'));
@@ -127,40 +134,46 @@ class User_model extends CI_Model {
             $this->db->update('users', $data);
             $this->upload_user_image($user_id);
             $this->session->set_flashdata('flash_message', get_phrase('user_update_successfully'));
-        }else {
+        } else {
             $this->session->set_flashdata('error_message', get_phrase('email_duplication'));
         }
 
         $this->upload_user_image($user_id);
     }
-    public function delete_user($user_id = "") {
+    public function delete_user($user_id = "")
+    {
         $this->db->where('id', $user_id);
         $this->db->delete('users');
         $this->session->set_flashdata('flash_message', get_phrase('user_deleted_successfully'));
     }
 
-    public function unlock_screen_by_password($password = "") {
+    public function unlock_screen_by_password($password = "")
+    {
         $password = sha1($password);
         return $this->db->get_where('users', array('id' => $this->session->userdata('user_id'), 'password' => $password))->num_rows();
     }
 
-    public function register_user($data) {
+    public function register_user($data)
+    {
         $this->db->insert('users', $data);
         return $this->db->insert_id();
     }
 
-    public function my_courses() {
+    public function my_courses()
+    {
         return $this->db->get_where('enrol', array('user_id' => $this->session->userdata('user_id')));
     }
 
-    public function upload_user_image($user_id) {
+    public function upload_user_image($user_id)
+    {
         if (isset($_FILES['user_image']) && $_FILES['user_image']['name'] != "") {
-            move_uploaded_file($_FILES['user_image']['tmp_name'], 'uploads/user_image/'.$user_id.'.jpg');
+            move_uploaded_file($_FILES['user_image']['tmp_name'], 'uploads/user_image/' . $user_id . '.jpg');
             $this->session->set_flashdata('flash_message', get_phrase('user_update_successfully'));
         }
     }
 
-    public function update_account_settings($user_id) {
+    public function update_account_settings($user_id)
+    {
         $validity = $this->check_duplication('on_update', $this->input->post('email'), $user_id);
         if ($validity) {
             if (!empty($_POST['current_password']) && !empty($_POST['new_password']) && !empty($_POST['confirm_password'])) {
@@ -170,7 +183,7 @@ class User_model extends CI_Model {
                 $confirm_password = $this->input->post('confirm_password');
                 if ($user_details['password'] == sha1($current_password) && $new_password == $confirm_password) {
                     $data['password'] = sha1($new_password);
-                }else {
+                } else {
                     $this->session->set_flashdata('error_message', get_phrase('mismatch_password'));
                     return;
                 }
@@ -179,12 +192,13 @@ class User_model extends CI_Model {
             $this->db->where('id', $user_id);
             $this->db->update('users', $data);
             $this->session->set_flashdata('flash_message', get_phrase('updated_successfully'));
-        }else {
+        } else {
             $this->session->set_flashdata('error_message', get_phrase('email_duplication'));
         }
     }
 
-    public function change_password($user_id) {
+    public function change_password($user_id)
+    {
         $data = array();
         if (!empty($_POST['current_password']) && !empty($_POST['new_password']) && !empty($_POST['confirm_password'])) {
             $user_details = $this->get_all_user($user_id)->row_array();
@@ -194,7 +208,7 @@ class User_model extends CI_Model {
 
             if ($user_details['password'] == sha1($current_password) && $new_password == $confirm_password) {
                 $data['password'] = sha1($new_password);
-            }else {
+            } else {
                 $this->session->set_flashdata('error_message', get_phrase('mismatch_password'));
                 return;
             }
@@ -206,10 +220,11 @@ class User_model extends CI_Model {
     }
 
 
-    public function get_instructor($id = 0) {
+    public function get_instructor($id = 0)
+    {
         if ($id > 0) {
             return $this->db->get_all_user($id);
-        }else {
+        } else {
             if ($this->check_if_instructor_exists()) {
                 $this->db->select('user_id');
                 $this->db->distinct('user_id');
@@ -223,31 +238,33 @@ class User_model extends CI_Model {
 
                 $this->db->where_in('id', $ids);
                 return $this->db->get('users')->result_array();
-            }
-            else {
+            } else {
                 return array();
             }
         }
     }
 
-    public function check_if_instructor_exists() {
+    public function check_if_instructor_exists()
+    {
         $this->db->where('user_id >', 0);
         $result = $this->db->get('course')->num_rows();
         if ($result > 0) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }
 
-    public function get_user_image_url($user_id) {
+    public function get_user_image_url($user_id)
+    {
 
-         if (file_exists('uploads/user_image/'.$user_id.'.jpg'))
-             return base_url().'uploads/user_image/'.$user_id.'.jpg';
+        if (file_exists('uploads/user_image/' . $user_id . '.jpg'))
+            return base_url() . 'uploads/user_image/' . $user_id . '.jpg';
         else
-            return base_url().'uploads/user_image/placeholder.png';
+            return base_url() . 'uploads/user_image/placeholder.png';
     }
-    public function get_instructor_list() {
+    public function get_instructor_list()
+    {
         $query1 = $this->db->get_where('course', array('status' => 'active'))->result_array();
         $instructor_ids = array();
         $query_result = array();
@@ -259,14 +276,15 @@ class User_model extends CI_Model {
         if (count($instructor_ids) > 0) {
             $this->db->where_in('id', $instructor_ids);
             $query_result = $this->db->get('users');
-        }else {
+        } else {
             $query_result = $this->get_admin_details();
         }
 
         return $query_result;
     }
 
-    public function update_instructor_paypal_settings($user_id = '') {
+    public function update_instructor_paypal_settings($user_id = '')
+    {
         // Update paypal keys
         $paypal_info = array();
         $paypal['production_client_id'] = html_escape($this->input->post('paypal_client_id'));
@@ -275,7 +293,8 @@ class User_model extends CI_Model {
         $this->db->where('id', $user_id);
         $this->db->update('users', $data);
     }
-    public function update_instructor_stripe_settings($user_id = '') {
+    public function update_instructor_stripe_settings($user_id = '')
+    {
         // Update Stripe keys
         $stripe_info = array();
         $stripe_keys = array(

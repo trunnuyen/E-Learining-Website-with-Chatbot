@@ -115,7 +115,7 @@ class Install extends CI_Controller {
   function check_database_connection($hostname, $username, $password, $dbname) {
     $link = mysqli_connect($hostname, $username, $password, $dbname);
 		if (!$link) {
-		  mysqli_close($link);
+		  mysqli_close(mysqli_connect($hostname, $username, $password, $dbname));
 		  return 'failed';
 		}
 		$db_selected = mysqli_select_db($link, $dbname);
