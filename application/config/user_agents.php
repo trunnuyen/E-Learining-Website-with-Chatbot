@@ -87,8 +87,7 @@ $browsers = array(
 	'amaya'			=> 'Amaya',
 	'IBrowse'		=> 'IBrowse',
 	'Maxthon'		=> 'Maxthon',
-	'Ubuntu'		=> 'Ubuntu Web Browser',
-	'Vivaldi'		=> 'Vivaldi'
+	'Ubuntu'		=> 'Ubuntu Web Browser'
 );
 
 $mobiles = array(
@@ -111,7 +110,6 @@ $mobiles = array(
 	// Phones and Manufacturers
 	'motorola'		=> 'Motorola',
 	'nokia'			=> 'Nokia',
-	'nexus'			=> 'Nexus',
 	'palm'			=> 'Palm',
 	'iphone'		=> 'Apple iPhone',
 	'ipad'			=> 'iPad',
@@ -152,12 +150,6 @@ $mobiles = array(
 	'wii'			=> 'Nintendo Wii',
 	'open web'		=> 'Open Web',
 	'openweb'		=> 'OpenWeb',
-	'meizu'                 => 'Meizu',
-	'huawei'                => 'Huawei',
-	'xiaomi'                => 'Xiaomi',
-	'oppo'                  => 'Oppo',
-	'vivo'                  => 'Vivo',
-	'infinix'               => 'Infinix',
 
 	// Operating Systems
 	'android'		=> 'Android',
@@ -218,6 +210,5 @@ $robots = array(
 	'curious george'	=> 'Curious George',
 	'ia_archiver'		=> 'Alexa Crawler',
 	'MJ12bot'		=> 'Majestic-12',
-	'Uptimebot'		=> 'Uptimebot',
-	'UptimeRobot'		=> 'UptimeRobot'
+	'Uptimebot'		=> 'Uptimebot'
 );

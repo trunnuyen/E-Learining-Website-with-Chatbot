@@ -6,8 +6,8 @@ $total_price = 0;
 	<span class="number"><?php echo sizeof($this->session->userdata('cart_items')); ?></span>
 </div>
 
-<!-- Cart Dropdown goes here -->
-<div class="dropdown course-list-dropdown corner-triangle top-right" style="display: none;"> <!-- Just remove the display none from the css to make it work -->
+
+<div class="dropdown course-list-dropdown corner-triangle top-right" > 
 	<div class="list-wrapper">
 		<div class="item-list">
 			<ul>
@@ -45,18 +45,18 @@ $total_price = 0;
 		</div>
 		<div class="dropdown-footer">
 			<div class="cart-total-price clearfix">
-				<span><?php echo get_phrase('total'); ?>:</span>
+				<span>Tổng tiền:</span>
 				<div class="float-right">
 					<span class="current-price"><?php echo currency($total_price); ?></span>
 					<!-- <span class="original-price">$94.99</span> -->
 				</div>
 			</div>
-			<a href = "<?php echo site_url('home/shopping_cart'); ?>"><?php echo get_phrase('go_to_cart'); ?></a>
+			<a href = "<?php echo site_url('home/shopping_cart'); ?>" style="background: seagreen;">Xem giỏ hàng</a>
 		</div>
 	</div>
 	<div class="empty-box text-center d-none">
-		<p><?php echo get_phrase('your_cart_is_empty') ?>.</p>
-		<a href="">Keep Shopping</a>
+		<p>Giỏ hàng của bạn đang trống.</p>
+		<a href="">Đăng ký khóa học mới</a>
 	</div>
 </div>
 

@@ -1,8 +1,8 @@
 <?php
-defined('BASEPATH') or exit('No direct script access allowed');
-if (!function_exists('pagintaion')) {
-    function pagintaion($total_rows, $per_page_item)
-    {
+defined('BASEPATH') OR exit('No direct script access allowed');
+if ( ! function_exists('pagintaion'))
+{
+    function pagintaion($total_rows, $per_page_item){
         $config['per_page']        = $per_page_item;
         $config['num_links']       = 2;
         $config['total_rows']      = $total_rows;

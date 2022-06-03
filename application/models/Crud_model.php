@@ -629,6 +629,7 @@ class Crud_model extends CI_Model
         return $courses;
     }
 
+
     public function get_status_wise_courses_for_instructor($status = "")
     {
         if ($status != "") {
@@ -951,7 +952,7 @@ class Crud_model extends CI_Model
 
     public function update_frontend_banner()
     {
-        move_uploaded_file($_FILES['banner_image']['tmp_name'], 'uploads/system/home-banner.jpg');
+        move_uploaded_file($_FILES['banner_image']['tmp_name'], 'uploads/system/banner2.jpg');
     }
 
     public function update_light_logo()
@@ -1032,6 +1033,14 @@ class Crud_model extends CI_Model
         return $this->db->get('course')->result_array();
     }
 
+    public function get_sales_course()
+    {
+        $this->db->order_by("id", "desc");
+        $this->db->limit('10');
+        $this->db->where('discount_flag', '1');
+        return $this->db->get('course')->result_array();
+    }
+
     public function enrol_student($user_id)
     {
         $purchased_courses = $this->session->userdata('cart_items');
@@ -1105,15 +1114,7 @@ class Crud_model extends CI_Model
             $this->db->insert('payment', $data);
         }
     }
-
-    public function get_default_lesson($section_id)
-    {
-        $this->db->order_by('order', "asc");
-        $this->db->limit(1);
-        $this->db->where('section_id', $section_id);
-        return $this->db->get('lesson');
-    }
-
+    
     public function get_courses_by_wishlists()
     {
         $wishlists = $this->getWishLists();
@@ -1136,38 +1137,6 @@ class Crud_model extends CI_Model
         } else {
             return array();
         }
-    }
-
-    public function get_total_duration_of_lesson_by_course_id($course_id)
-    {
-        $total_duration = 0;
-        $lessons = $this->crud_model->get_lessons('course', $course_id)->result_array();
-        foreach ($lessons as $lesson) {
-            if ($lesson['lesson_type'] != "other") {
-                $time_array = explode(':', $lesson['duration']);
-                $hour_to_seconds = $time_array[0] * 60 * 60;
-                $minute_to_seconds = $time_array[1] * 60;
-                $seconds = $time_array[2];
-                $total_duration += $hour_to_seconds + $minute_to_seconds + $seconds;
-            }
-        }
-        return gmdate("H:i:s", $total_duration) . ' ' . get_phrase('hours');
-    }
-
-    public function get_total_duration_of_lesson_by_section_id($section_id)
-    {
-        $total_duration = 0;
-        $lessons = $this->crud_model->get_lessons('section', $section_id)->result_array();
-        foreach ($lessons as $lesson) {
-            if ($lesson['lesson_type'] != 'other') {
-                $time_array = explode(':', $lesson['duration']);
-                $hour_to_seconds = $time_array[0] * 60 * 60;
-                $minute_to_seconds = $time_array[1] * 60;
-                $seconds = $time_array[2];
-                $total_duration += $hour_to_seconds + $minute_to_seconds + $seconds;
-            }
-        }
-        return gmdate("H:i:s", $total_duration) . ' ' . get_phrase('hours');
     }
 
     public function rate($data)
@@ -1231,82 +1200,6 @@ class Crud_model extends CI_Model
         return floor($percentage);
     }
 
-    ////////private message//////
-    function send_new_private_message()
-    {
-        $message    = $this->input->post('message');
-        $timestamp  = strtotime(date("Y-m-d H:i:s"));
-
-        $receiver   = $this->input->post('receiver');
-        $sender     = $this->session->userdata('user_id');
-
-        //check if the thread between those 2 users exists, if not create new thread
-        $num1 = $this->db->get_where('message_thread', array('sender' => $sender, 'receiver' => $receiver))->num_rows();
-        $num2 = $this->db->get_where('message_thread', array('sender' => $receiver, 'receiver' => $sender))->num_rows();
-        if ($num1 == 0 && $num2 == 0) {
-            $message_thread_code                        = substr(md5(rand(100000000, 20000000000)), 0, 15);
-            $data_message_thread['message_thread_code'] = $message_thread_code;
-            $data_message_thread['sender']              = $sender;
-            $data_message_thread['receiver']            = $receiver;
-            $this->db->insert('message_thread', $data_message_thread);
-        }
-        if ($num1 > 0)
-            $message_thread_code = $this->db->get_where('message_thread', array('sender' => $sender, 'receiver' => $receiver))->row()->message_thread_code;
-        if ($num2 > 0)
-            $message_thread_code = $this->db->get_where('message_thread', array('sender' => $receiver, 'receiver' => $sender))->row()->message_thread_code;
-
-
-        $data_message['message_thread_code']    = $message_thread_code;
-        $data_message['message']                = $message;
-        $data_message['sender']                 = $sender;
-        $data_message['timestamp']              = $timestamp;
-        $this->db->insert('message', $data_message);
-
-        return $message_thread_code;
-    }
-
-    function send_reply_message($message_thread_code)
-    {
-        $message    = html_escape($this->input->post('message'));
-        $timestamp  = strtotime(date("Y-m-d H:i:s"));
-        $sender     = $this->session->userdata('user_id');
-
-        $data_message['message_thread_code']    = $message_thread_code;
-        $data_message['message']                = $message;
-        $data_message['sender']                 = $sender;
-        $data_message['timestamp']              = $timestamp;
-        $this->db->insert('message', $data_message);
-    }
-
-    function mark_thread_messages_read($message_thread_code)
-    {
-        // mark read only the oponnent messages of this thread, not currently logged in user's sent messages
-        $current_user = $this->session->userdata('user_id');
-        $this->db->where('sender !=', $current_user);
-        $this->db->where('message_thread_code', $message_thread_code);
-        $this->db->update('message', array('read_status' => 1));
-    }
-
-    function count_unread_message_of_thread($message_thread_code)
-    {
-        $unread_message_counter = 0;
-        $current_user = $this->session->userdata('user_id');
-        $messages = $this->db->get_where('message', array('message_thread_code' => $message_thread_code))->result_array();
-        foreach ($messages as $row) {
-            if ($row['sender'] != $current_user && $row['read_status'] == '0')
-                $unread_message_counter++;
-        }
-        return $unread_message_counter;
-    }
-
-    public function get_last_message_by_message_thread_code($message_thread_code)
-    {
-        $this->db->order_by('message_id', 'desc');
-        $this->db->limit(1);
-        $this->db->where(array('message_thread_code' => $message_thread_code));
-        return $this->db->get('message');
-    }
-
     function curl_request($code = '')
     {
 
@@ -1344,8 +1237,6 @@ class Crud_model extends CI_Model
         }
     }
 
-
-    // version 1.3
     function get_currencies()
     {
         return $this->db->get('currency')->result_array();
@@ -1363,7 +1254,6 @@ class Crud_model extends CI_Model
         return $this->db->get('currency')->result_array();
     }
 
-    // version 1.4
     function filter_course($selected_category_id = "", $selected_price = "", $selected_level = "", $selected_language = "", $selected_rating = "")
     {
         //echo $selected_category_id.' '.$selected_price.' '.$selected_level.' '.$selected_language.' '.$selected_rating;
@@ -1449,41 +1339,6 @@ class Crud_model extends CI_Model
         return $this->db->get('course')->result_array();
     }
 
-    public function sort_section($section_json)
-    {
-        $sections = json_decode($section_json);
-        foreach ($sections as $key => $value) {
-            $updater = array(
-                'order' => $key + 1
-            );
-            $this->db->where('id', $value);
-            $this->db->update('section', $updater);
-        }
-    }
-
-    public function sort_lesson($lesson_json)
-    {
-        $lessons = json_decode($lesson_json);
-        foreach ($lessons as $key => $value) {
-            $updater = array(
-                'order' => $key + 1
-            );
-            $this->db->where('id', $value);
-            $this->db->update('lesson', $updater);
-        }
-    }
-    public function sort_question($question_json)
-    {
-        $questions = json_decode($question_json);
-        foreach ($questions as $key => $value) {
-            $updater = array(
-                'order' => $key + 1
-            );
-            $this->db->where('id', $value);
-            $this->db->update('question', $updater);
-        }
-    }
-
     public function get_free_and_paid_courses($price_status = "", $instructor_id = "")
     {
         $this->db->where('status', 'active');
@@ -1497,195 +1352,5 @@ class Crud_model extends CI_Model
             $this->db->where('user_id', $instructor_id);
         }
         return $this->db->get('course');
-    }
-
-    // Adding quiz functionalities
-    public function add_quiz($course_id = "")
-    {
-        $data['course_id'] = $course_id;
-        $data['title'] = html_escape($this->input->post('title'));
-        $data['section_id'] = html_escape($this->input->post('section_id'));
-
-        $data['lesson_type'] = 'quiz';
-        $data['duration'] = '00:00:00';
-        $data['date_added'] = strtotime(date('D, d-M-Y'));
-        $data['summary'] = html_escape($this->input->post('summary'));
-        $this->db->insert('lesson', $data);
-    }
-
-    // updating quiz functionalities
-    public function edit_quiz($lesson_id = "")
-    {
-        $data['title'] = html_escape($this->input->post('title'));
-        $data['section_id'] = html_escape($this->input->post('section_id'));
-        $data['last_modified'] = strtotime(date('D, d-M-Y'));
-        $data['summary'] = html_escape($this->input->post('summary'));
-        $this->db->where('id', $lesson_id);
-        $this->db->update('lesson', $data);
-    }
-
-    // Get quiz questions
-    public function get_quiz_questions($quiz_id)
-    {
-        $this->db->order_by("order", "asc");
-        $this->db->where('quiz_id', $quiz_id);
-        return $this->db->get('question');
-    }
-
-    public function get_quiz_question_by_id($question_id)
-    {
-        $this->db->order_by("order", "asc");
-        $this->db->where('id', $question_id);
-        return $this->db->get('question');
-    }
-
-    // Add Quiz Questions
-    public function add_quiz_questions($quiz_id)
-    {
-        $question_type = $this->input->post('question_type');
-        if ($question_type == 'mcq') {
-            $response = $this->add_multiple_choice_question($quiz_id);
-            return $response;
-        }
-    }
-
-    public function update_quiz_questions($question_id)
-    {
-        $question_type = $this->input->post('question_type');
-        if ($question_type == 'mcq') {
-            $response = $this->update_multiple_choice_question($question_id);
-            return $response;
-        }
-    }
-    // multiple_choice_question crud functions
-    function add_multiple_choice_question($quiz_id)
-    {
-        if (sizeof($this->input->post('options')) != $this->input->post('number_of_options')) {
-            return false;
-        }
-        foreach ($this->input->post('options') as $option) {
-            if ($option == "") {
-                return false;
-            }
-        }
-        if (sizeof($this->input->post('correct_answers')) == 0) {
-            $correct_answers = [""];
-        } else {
-            $correct_answers = $this->input->post('correct_answers');
-        }
-        $data['quiz_id']            = $quiz_id;
-        $data['title']              = html_escape($this->input->post('title'));
-        $data['number_of_options']  = html_escape($this->input->post('number_of_options'));
-        $data['type']               = 'multiple_choice';
-        $data['options']            = json_encode($this->input->post('options'));
-        $data['correct_answers']    = json_encode($correct_answers);
-        $this->db->insert('question', $data);
-        return true;
-    }
-    // update multiple choice question
-    function update_multiple_choice_question($question_id)
-    {
-        if (sizeof($this->input->post('options')) != $this->input->post('number_of_options')) {
-            return false;
-        }
-        foreach ($this->input->post('options') as $option) {
-            if ($option == "") {
-                return false;
-            }
-        }
-
-        if (sizeof($this->input->post('correct_answers')) == 0) {
-            $correct_answers = [""];
-        } else {
-            $correct_answers = $this->input->post('correct_answers');
-        }
-
-        $data['title']              = html_escape($this->input->post('title'));
-        $data['number_of_options']  = html_escape($this->input->post('number_of_options'));
-        $data['type']               = 'multiple_choice';
-        $data['options']            = json_encode($this->input->post('options'));
-        $data['correct_answers']    = json_encode($correct_answers);
-        $this->db->where('id', $question_id);
-        $this->db->update('question', $data);
-        return true;
-    }
-
-    function delete_quiz_question($question_id)
-    {
-        $this->db->where('id', $question_id);
-        $this->db->delete('question');
-        return true;
-    }
-
-    function get_application_details()
-    {
-        $purchase_code = get_settings('purchase_code');
-        $returnable_array = array(
-            'purchase_code_status' => get_phrase('not_found'),
-            'support_expiry_date'  => get_phrase('not_found'),
-            'customer_name'        => get_phrase('not_found')
-        );
-
-        $personal_token = "gC0J1ZpY53kRpynNe4g2rWT5s4MW56Zg";
-        $url = "https://api.envato.com/v3/market/author/sale?code=" . $purchase_code;
-        $curl = curl_init($url);
-
-        //setting the header for the rest of the api
-        $bearer   = 'bearer ' . $personal_token;
-        $header   = array();
-        $header[] = 'Content-length: 0';
-        $header[] = 'Content-type: application/json; charset=utf-8';
-        $header[] = 'Authorization: ' . $bearer;
-
-        $verify_url = 'https://api.envato.com/v1/market/private/user/verify-purchase:' . $purchase_code . '.json';
-        $ch_verify = curl_init($verify_url . '?code=' . $purchase_code);
-
-        curl_setopt($ch_verify, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($ch_verify, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch_verify, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch_verify, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($ch_verify, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
-
-        $cinit_verify_data = curl_exec($ch_verify);
-        curl_close($ch_verify);
-
-        $response = json_decode($cinit_verify_data, true);
-
-        if (count($response['verify-purchase']) > 0) {
-
-            //print_r($response);
-            $item_name                 = $response['verify-purchase']['item_name'];
-            $purchase_time             = $response['verify-purchase']['created_at'];
-            $customer                 = $response['verify-purchase']['buyer'];
-            $licence_type             = $response['verify-purchase']['licence'];
-            $support_until            = $response['verify-purchase']['supported_until'];
-            $customer                 = $response['verify-purchase']['buyer'];
-
-            $purchase_date            = date("d M, Y", strtotime($purchase_time));
-
-            $todays_timestamp         = strtotime(date("d M, Y"));
-            $support_expiry_timestamp = strtotime($support_until);
-
-            $support_expiry_date    = date("d M, Y", $support_expiry_timestamp);
-
-            if ($todays_timestamp > $support_expiry_timestamp)
-                $support_status        = get_phrase('expired');
-            else
-                $support_status        = get_phrase('valid');
-
-            $returnable_array = array(
-                'purchase_code_status' => $support_status,
-                'support_expiry_date'  => $support_expiry_date,
-                'customer_name'        => $customer
-            );
-        } else {
-            $returnable_array = array(
-                'purchase_code_status' => 'invalid',
-                'support_expiry_date'  => 'invalid',
-                'customer_name'        => 'invalid'
-            );
-        }
-
-        return $returnable_array;
     }
 }
