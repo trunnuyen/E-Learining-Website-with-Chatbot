@@ -397,7 +397,6 @@ class Crud_model extends CI_Model
         $data['short_description'] = $this->input->post('short_description');
         $data['description'] = $this->input->post('description');
         $data['outcomes'] = $outcomes;
-        $data['language'] = $this->input->post('language_made_in');
         $data['sub_category_id'] = $this->input->post('sub_category_id');
         $category_details = $this->get_category_details_by_id($this->input->post('sub_category_id'))->row_array();
         $data['category_id'] = $category_details['parent'];
@@ -443,13 +442,7 @@ class Crud_model extends CI_Model
         if ($_FILES['course_thumbnail']['name'] != "") {
             move_uploaded_file($_FILES['course_thumbnail']['tmp_name'], 'uploads/thumbnails/course_thumbnails/' . $course_id . '.jpg');
         }
-        if ($data['status'] == 'approved') {
-            $this->session->set_flashdata('flash_message', get_phrase('course_added_successfully'));
-        } elseif ($data['status'] == 'pending') {
-            $this->session->set_flashdata('flash_message', get_phrase('course_added_successfully') . '. ' . get_phrase('please_wait_untill_Admin_approves_it'));
-        } elseif ($data['status'] == 'draft') {
-            $this->session->set_flashdata('flash_message', get_phrase('your_course_has_been_added_to_draft'));
-        }
+        
     }
 
     function trim_and_return_json($untrimmed_array)
@@ -511,13 +504,6 @@ class Crud_model extends CI_Model
 
         if ($_FILES['course_thumbnail']['name'] != "") {
             move_uploaded_file($_FILES['course_thumbnail']['tmp_name'], 'uploads/thumbnails/course_thumbnails/' . $course_id . '.jpg');
-        }
-        if ($data['status'] == 'approved') {
-            $this->session->set_flashdata('flash_message', get_phrase('course_updated_successfully'));
-        } elseif ($data['status'] == 'pending') {
-            $this->session->set_flashdata('flash_message', get_phrase('course_updated_successfully') . '. ' . get_phrase('please_wait_untill_Admin_approves_it'));
-        } elseif ($data['status'] == 'draft') {
-            $this->session->set_flashdata('flash_message', get_phrase('your_course_has_been_added_to_draft'));
         }
     }
 
@@ -758,223 +744,6 @@ class Crud_model extends CI_Model
         $this->db->update('course', $updater);
     }
 
-    public function add_lesson()
-    {
-        $data['course_id'] = html_escape($this->input->post('course_id'));
-        $data['title'] = html_escape($this->input->post('title'));
-        $data['section_id'] = html_escape($this->input->post('section_id'));
-
-        $lesson_type_array = explode('-', $this->input->post('lesson_type'));
-        $lesson_type = $lesson_type_array[0];
-
-        $data['attachment_type'] = $lesson_type_array[1];
-        $data['lesson_type'] = $lesson_type;
-
-        if ($lesson_type == 'video') {
-            $lesson_provider = $this->input->post('lesson_provider');
-            if ($lesson_provider == 'youtube' || $lesson_provider == 'vimeo') {
-                if ($this->input->post('video_url') == "" || $this->input->post('duration') == "") {
-                    $this->session->set_flashdata('error_message', get_phrase('invalid_lesson_url_and_duration'));
-                    redirect(site_url(strtolower($this->session->userdata('role')) . '/course_form/course_edit/' . $data['course_id']), 'refresh');
-                }
-                $data['video_url'] = html_escape($this->input->post('video_url'));
-
-                $duration_formatter = explode(':', $this->input->post('duration'));
-                $hour = sprintf('%02d', $duration_formatter[0]);
-                $min = sprintf('%02d', $duration_formatter[1]);
-                $sec = sprintf('%02d', $duration_formatter[2]);
-                $data['duration'] = $hour . ':' . $min . ':' . $sec;
-
-                $video_details = $this->video_model->getVideoDetails($data['video_url']);
-                $data['video_type'] = $video_details['provider'];
-            } elseif ($lesson_provider == 'html5') {
-                if ($this->input->post('html5_video_url') == "" || $this->input->post('html5_duration') == "") {
-                    $this->session->set_flashdata('error_message', get_phrase('invalid_lesson_url_and_duration'));
-                    redirect(site_url(strtolower($this->session->userdata('role')) . '/course_form/course_edit/' . $data['course_id']), 'refresh');
-                }
-                $data['video_url'] = html_escape($this->input->post('html5_video_url'));
-                $duration_formatter = explode(':', $this->input->post('html5_duration'));
-                $hour = sprintf('%02d', $duration_formatter[0]);
-                $min = sprintf('%02d', $duration_formatter[1]);
-                $sec = sprintf('%02d', $duration_formatter[2]);
-                $data['duration'] = $hour . ':' . $min . ':' . $sec;
-                $data['video_type'] = 'html5';
-            } else {
-                $this->session->set_flashdata('error_message', get_phrase('invalid_lesson_provider'));
-                redirect(site_url(strtolower($this->session->userdata('role')) . '/course_form/course_edit/' . $data['course_id']), 'refresh');
-            }
-        } else {
-            if ($_FILES['attachment']['name'] == "") {
-                $this->session->set_flashdata('error_message', get_phrase('invalid_attachment'));
-                redirect(site_url(strtolower($this->session->userdata('role')) . '/course_form/course_edit/' . $data['course_id']), 'refresh');
-            } else {
-                $fileName           = $_FILES['attachment']['name'];
-                $tmp                = explode('.', $fileName);
-                $fileExtension      = end($tmp);
-                $uploadable_file    =  md5(uniqid(rand(), true)) . '.' . $fileExtension;
-                $data['attachment'] = $uploadable_file;
-
-                if (!file_exists('uploads/lesson_files')) {
-                    mkdir('uploads/lesson_files', 0777, true);
-                }
-                move_uploaded_file($_FILES['attachment']['tmp_name'], 'uploads/lesson_files/' . $uploadable_file);
-            }
-        }
-
-        $data['date_added'] = strtotime(date('D, d-M-Y'));
-        $data['summary'] = $this->input->post('summary');
-
-        $this->db->insert('lesson', $data);
-        $inserted_id = $this->db->insert_id();
-
-        if ($_FILES['thumbnail']['name'] != "") {
-            if (!file_exists('uploads/thumbnails/lesson_thumbnails')) {
-                mkdir('uploads/thumbnails/lesson_thumbnails', 0777, true);
-            }
-            move_uploaded_file($_FILES['thumbnail']['tmp_name'], 'uploads/thumbnails/lesson_thumbnails/' . $inserted_id . '.jpg');
-        }
-    }
-
-    public function edit_lesson($lesson_id)
-    {
-
-        $previous_data = $this->db->get_where('lesson', array('id' => $lesson_id))->row_array();
-
-        $data['course_id'] = html_escape($this->input->post('course_id'));
-        $data['title'] = html_escape($this->input->post('title'));
-        $data['section_id'] = html_escape($this->input->post('section_id'));
-
-        $lesson_type_array = explode('-', $this->input->post('lesson_type'));
-        $lesson_type = $lesson_type_array[0];
-
-        $data['attachment_type'] = $lesson_type_array[1];
-        $data['lesson_type'] = $lesson_type;
-
-        if ($lesson_type == 'video') {
-            $lesson_provider = $this->input->post('lesson_provider');
-            if ($lesson_provider == 'youtube' || $lesson_provider == 'vimeo') {
-                if ($this->input->post('video_url') == "" || $this->input->post('duration') == "") {
-                    $this->session->set_flashdata('error_message', get_phrase('invalid_lesson_url_and_duration'));
-                    redirect(site_url(strtolower($this->session->userdata('role')) . '/course_form/course_edit/' . $data['course_id']), 'refresh');
-                }
-                $data['video_url'] = html_escape($this->input->post('video_url'));
-
-                $duration_formatter = explode(':', $this->input->post('duration'));
-                $hour = sprintf('%02d', $duration_formatter[0]);
-                $min = sprintf('%02d', $duration_formatter[1]);
-                $sec = sprintf('%02d', $duration_formatter[2]);
-                $data['duration'] = $hour . ':' . $min . ':' . $sec;
-
-                $video_details = $this->video_model->getVideoDetails($data['video_url']);
-                $data['video_type'] = $video_details['provider'];
-            } elseif ($lesson_provider == 'html5') {
-                if ($this->input->post('html5_video_url') == "" || $this->input->post('html5_duration') == "") {
-                    $this->session->set_flashdata('error_message', get_phrase('invalid_lesson_url_and_duration'));
-                    redirect(site_url(strtolower($this->session->userdata('role')) . '/course_form/course_edit/' . $data['course_id']), 'refresh');
-                }
-                $data['video_url'] = html_escape($this->input->post('html5_video_url'));
-
-                $duration_formatter = explode(':', $this->input->post('html5_duration'));
-                $hour = sprintf('%02d', $duration_formatter[0]);
-                $min = sprintf('%02d', $duration_formatter[1]);
-                $sec = sprintf('%02d', $duration_formatter[2]);
-                $data['duration'] = $hour . ':' . $min . ':' . $sec;
-                $data['video_type'] = 'html5';
-
-                if ($_FILES['thumbnail']['name'] != "") {
-                    if (!file_exists('uploads/thumbnails/lesson_thumbnails')) {
-                        mkdir('uploads/thumbnails/lesson_thumbnails', 0777, true);
-                    }
-                    move_uploaded_file($_FILES['thumbnail']['tmp_name'], 'uploads/thumbnails/lesson_thumbnails/' . $lesson_id . '.jpg');
-                }
-            } else {
-                $this->session->set_flashdata('error_message', get_phrase('invalid_lesson_provider'));
-                redirect(site_url(strtolower($this->session->userdata('role')) . '/course_form/course_edit/' . $data['course_id']), 'refresh');
-            }
-            $data['attachment'] = "";
-        } else {
-            if ($_FILES['attachment']['name'] != "") {
-                // unlinking previous attachments
-                if ($previous_data['attachment'] != "") {
-                    unlink('uploads/lesson_files/' . $previous_data['attachment']);
-                }
-
-                $fileName           = $_FILES['attachment']['name'];
-                $tmp                = explode('.', $fileName);
-                $fileExtension      = end($tmp);
-                $uploadable_file    =  md5(uniqid(rand(), true)) . '.' . $fileExtension;
-                $data['attachment'] = $uploadable_file;
-                $data['video_type'] = "";
-                $data['duration'] = "";
-                $data['video_url'] = "";
-                if (!file_exists('uploads/lesson_files')) {
-                    mkdir('uploads/lesson_files', 0777, true);
-                }
-                move_uploaded_file($_FILES['attachment']['tmp_name'], 'uploads/lesson_files/' . $uploadable_file);
-            }
-        }
-
-        $data['last_modified'] = strtotime(date('D, d-M-Y'));
-        $data['summary'] = $this->input->post('summary');
-
-        $this->db->where('id', $lesson_id);
-        $this->db->update('lesson', $data);
-    }
-    public function delete_lesson($lesson_id)
-    {
-        $this->db->where('id', $lesson_id);
-        $this->db->delete('lesson');
-    }
-
-    public function update_frontend_settings()
-    {
-        $data['value'] = html_escape($this->input->post('banner_title'));
-        $this->db->where('key', 'banner_title');
-        $this->db->update('frontend_settings', $data);
-
-        $data['value'] = html_escape($this->input->post('banner_sub_title'));
-        $this->db->where('key', 'banner_sub_title');
-        $this->db->update('frontend_settings', $data);
-
-
-        $data['value'] = $this->input->post('about_us');
-        $this->db->where('key', 'about_us');
-        $this->db->update('frontend_settings', $data);
-
-        $data['value'] = $this->input->post('terms_and_condition');
-        $this->db->where('key', 'terms_and_condition');
-        $this->db->update('frontend_settings', $data);
-
-        $data['value'] = $this->input->post('privacy_policy');
-        $this->db->where('key', 'privacy_policy');
-        $this->db->update('frontend_settings', $data);
-    }
-
-    public function update_frontend_banner()
-    {
-        move_uploaded_file($_FILES['banner_image']['tmp_name'], 'uploads/system/banner2.jpg');
-    }
-
-    public function update_light_logo()
-    {
-        move_uploaded_file($_FILES['light_logo']['tmp_name'], 'uploads/system/logo-light.png');
-    }
-
-    public function update_dark_logo()
-    {
-        move_uploaded_file($_FILES['dark_logo']['tmp_name'], 'uploads/system/logo-dark.png');
-    }
-
-    public function update_small_logo()
-    {
-        move_uploaded_file($_FILES['small_logo']['tmp_name'], 'uploads/system/logo-light-sm.png');
-    }
-
-    public function update_favicon()
-    {
-        move_uploaded_file($_FILES['favicon']['tmp_name'], 'uploads/system/favicon.png');
-    }
-
     public function handleWishList($course_id)
     {
         $wishlists = array();
@@ -1056,11 +825,9 @@ class Crud_model extends CI_Model
         $data['course_id'] = $this->input->post('course_id');
         $data['user_id']   = $this->input->post('user_id');
         if ($this->db->get_where('enrol', $data)->num_rows() > 0) {
-            $this->session->set_flashdata('error_message', get_phrase('student_has_already_been_enrolled_to_this_course'));
         } else {
             $data['date_added'] = strtotime(date('D, d-M-Y'));
             $this->db->insert('enrol', $data);
-            $this->session->set_flashdata('flash_message', get_phrase('student_has_been_enrolled_to_that_course'));
         }
     }
 
@@ -1071,14 +838,11 @@ class Crud_model extends CI_Model
             $data['course_id'] = $course_id;
             $data['user_id']   = $user_id;
             if ($this->db->get_where('enrol', $data)->num_rows() > 0) {
-                $this->session->set_flashdata('error_message', get_phrase('student_has_already_been_enrolled_to_this_course'));
             } else {
                 $data['date_added'] = strtotime(date('D, d-M-Y'));
                 $this->db->insert('enrol', $data);
-                $this->session->set_flashdata('flash_message', get_phrase('successfully_enrolled'));
             }
         } else {
-            $this->session->set_flashdata('error_message', get_phrase('this_course_is_not_free_at_all'));
             redirect(site_url('home/course/' . slugify($course_details['title']) . '/' . $course_id), 'refresh');
         }
     }

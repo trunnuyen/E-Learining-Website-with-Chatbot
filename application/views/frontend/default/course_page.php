@@ -12,22 +12,10 @@ $instructor_details = $this->user_model->get_all_user($course_details['user_id']
           <div class="rating-row">
             <span class="course-badge best-seller"><?php echo ucfirst($course_details['level']); ?></span>
             <?php
-            $total_rating =  $this->crud_model->get_ratings('course', $course_details['id'], true)->row()->rating;
-            $number_of_ratings = $this->crud_model->get_ratings('course', $course_details['id'])->num_rows();
-            if ($number_of_ratings > 0) {
-              $average_ceil_rating = ceil($total_rating / $number_of_ratings);
-            } else {
-              $average_ceil_rating = 0;
-            }
-
-            for ($i = 1; $i < 6; $i++) : ?>
-              <?php if ($i <= $average_ceil_rating) : ?>
+            for ($i = 1; $i < 6; $i++) : ?>             
                 <i class="fas fa-star filled" style="color: #f5c85b;"></i>
-              <?php else : ?>
-                <i class="fas fa-star"></i>
-              <?php endif; ?>
             <?php endfor; ?>
-            <span class="d-inline-block average-rating"><?php echo $average_ceil_rating; ?></span><span>(<?php echo $number_of_ratings . ' ' . "Lượt đánh giá"; ?>)</span>
+            <span class="d-inline-block average-rating"><?php echo $average_ceil_rating; ?></span><span>(2k Lượt đánh giá)</span>
             <span class="enrolled-num">
               <?php
               $number_of_enrolments = $this->crud_model->enrol_history($course_details['id'])->num_rows();
@@ -171,25 +159,12 @@ $instructor_details = $this->user_model->get_all_user($course_details['user_id']
             <div class="col-lg-3">
               <div class="average-rating">
                 <div class="num">
-                  <?php
-                  $total_rating =  $this->crud_model->get_ratings('course', $course_details['id'], true)->row()->rating;
-                  $number_of_ratings = $this->crud_model->get_ratings('course', $course_details['id'])->num_rows();
-                  if ($number_of_ratings > 0) {
-                    $average_ceil_rating = ceil($total_rating / $number_of_ratings);
-                  } else {
-                    $average_ceil_rating = 0;
-                  }
-                  echo $average_ceil_rating;
-                  ?>
+                  
                 </div>
                 <div class="rating">
                   <?php
-                  for ($i = 1; $i < 6; $i++) : ?>
-                    <?php if ($i <= $average_ceil_rating) : ?>
-                      <i class="fas fa-star filled" style="color: #f5c85b;"></i>
-                    <?php else : ?>
-                      <i class="fas fa-star" style="color: #abb0bb;"></i>
-                    <?php endif; ?>
+                  for ($i = 1; $i < 6; $i++) : ?>                    
+                      <i class="fas fa-star filled" style="color: #f5c85b;"></i>                  
                   <?php endfor; ?>
                 </div>
                 <div class="title">Đánh giá của học viên</div>
@@ -273,16 +248,14 @@ $instructor_details = $this->user_model->get_all_user($course_details['user_id']
         </div>
       </div>
       <div class="col-lg-4">
-        <div class="course-sidebar natural">
-          <?php if ($course_details['video_url'] != "") : ?>
+        <div class="course-sidebar natural">    
             <div class="preview-video-box">
-              <a data-toggle="modal" data-target="#CoursePreviewModal">
+              <a>
                 <img src="<?php echo $this->crud_model->get_course_thumbnail_url($course_details['id']); ?>" alt="" class="img-fluid">
                 <span class="preview-text"></span>
                 <span class="play-btn"></span>
               </a>
             </div>
-          <?php endif; ?>
           <div class="course-sidebar-text-box">
             <div class="price">
               <?php if ($course_details['is_free_course'] == 1) : ?>
@@ -423,94 +396,4 @@ $instructor_details = $this->user_model->get_all_user($course_details['user_id']
     }
   }
 
-  function pausePreview() {
-    player.pause();
-  }
 </script>
-<!-- Modal -->
-<?php if ($course_details['video_url'] != "") :
-  $provider = "";
-  $video_details = array();
-  if ($course_details['course_overview_provider'] == "html5") {
-    $provider = 'html5';
-  } else {
-    $video_details = $this->video_model->getVideoDetails($course_details['video_url']);
-    $provider = $video_details['provider'];
-  }
-?>
-  <div class="modal fade" id="CoursePreviewModal" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content course-preview-modal">
-        <div class="modal-header">
-          <h5 class="modal-title"><span><?php echo get_phrase('course_preview') ?>:</span><?php echo $course_details['title']; ?></h5>
-          <button type="button" class="close" data-dismiss="modal" onclick="pausePreview()">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="course-preview-video-wrap">
-            <div class="embed-responsive embed-responsive-16by9">
-              <?php if (strtolower(strtolower($provider)) == 'youtube') : ?>
-                <!------------- PLYR.IO ------------>
-                <link rel="stylesheet" href="<?php echo base_url(); ?>assets/global/plyr/plyr.css">
-
-                <div class="plyr__video-embed" id="player">
-                  <iframe height="500" src="<?php echo $course_details['video_url']; ?>?origin=https://plyr.io&amp;iv_load_policy=3&amp;modestbranding=1&amp;playsinline=1&amp;showinfo=0&amp;rel=0&amp;enablejsapi=1" allowfullscreen allowtransparency allow="autoplay"></iframe>
-                </div>
-
-                <script src="<?php echo base_url(); ?>assets/global/plyr/plyr.js"></script>
-                <script>
-                  const player = new Plyr('#player');
-                </script>
-                <!------------- PLYR.IO ------------>
-              <?php elseif (strtolower($provider) == 'vimeo') : ?>
-                <!------------- PLYR.IO ------------>
-                <link rel="stylesheet" href="<?php echo base_url(); ?>assets/global/plyr/plyr.css">
-                <div class="plyr__video-embed" id="player">
-                  <iframe height="500" src="https://player.vimeo.com/video/<?php echo $video_details['video_id']; ?>?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media" allowfullscreen allowtransparency allow="autoplay"></iframe>
-                </div>
-
-                <script src="<?php echo base_url(); ?>assets/global/plyr/plyr.js"></script>
-                <script>
-                  const player = new Plyr('#player');
-                </script>
-                <!------------- PLYR.IO ------------>
-              <?php else : ?>
-                <!------------- PLYR.IO ------------>
-                <link rel="stylesheet" href="<?php echo base_url(); ?>assets/global/plyr/plyr.css">
-                <video poster="<?php echo $this->crud_model->get_course_thumbnail_url($course_details['id']); ?>" id="player" playsinline controls>
-                  <?php if (get_video_extension($course_details['video_url']) == 'mp4') : ?>
-                    <source src="<?php echo $course_details['video_url']; ?>" type="video/mp4">
-                  <?php elseif (get_video_extension($course_details['video_url']) == 'webm') : ?>
-                    <source src="<?php echo $course_details['video_url']; ?>" type="video/webm">
-                  <?php else : ?>
-                    <h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
-                  <?php endif; ?>
-                </video>
-
-                <style media="screen">
-                  .plyr__video-wrapper {
-                    height: 450px;
-                  }
-                </style>
-
-                <script src="<?php echo base_url(); ?>assets/global/plyr/plyr.js"></script>
-                <script>
-                  const player = new Plyr('#player');
-                </script>
-                <!------------- PLYR.IO ------------>
-              <?php endif; ?>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-<?php endif; ?>
-<!-- Modal -->
-
-<style media="screen">
-  .embed-responsive-16by9::before {
-    padding-top: 0px;
-  }
-</style>

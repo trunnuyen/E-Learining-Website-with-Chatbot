@@ -33,7 +33,6 @@ class User_model extends CI_Model {
     public function add_user() {
         $validity = $this->check_duplication('on_create', $this->input->post('email'));
         if ($validity == false) {
-            $this->session->set_flashdata('error_message', get_phrase('email_duplication'));
         }else {
             $data['first_name'] = html_escape($this->input->post('first_name'));
             $data['last_name'] = html_escape($this->input->post('last_name'));
@@ -66,7 +65,6 @@ class User_model extends CI_Model {
             $this->db->insert('users', $data);
             $user_id = $this->db->insert_id();
             $this->upload_user_image($user_id);
-            $this->session->set_flashdata('flash_message', get_phrase('user_added_successfully'));
         }
     }
 
@@ -126,17 +124,12 @@ class User_model extends CI_Model {
             $this->db->where('id', $user_id);
             $this->db->update('users', $data);
             $this->upload_user_image($user_id);
-            $this->session->set_flashdata('flash_message', get_phrase('user_update_successfully'));
-        }else {
-            $this->session->set_flashdata('error_message', get_phrase('email_duplication'));
         }
-
         $this->upload_user_image($user_id);
     }
     public function delete_user($user_id = "") {
         $this->db->where('id', $user_id);
         $this->db->delete('users');
-        $this->session->set_flashdata('flash_message', get_phrase('user_deleted_successfully'));
     }
 
     public function unlock_screen_by_password($password = "") {
@@ -156,7 +149,6 @@ class User_model extends CI_Model {
     public function upload_user_image($user_id) {
         if (isset($_FILES['user_image']) && $_FILES['user_image']['name'] != "") {
             move_uploaded_file($_FILES['user_image']['tmp_name'], 'uploads/user_image/'.$user_id.'.jpg');
-            $this->session->set_flashdata('flash_message', get_phrase('user_update_successfully'));
         }
     }
 
@@ -171,16 +163,12 @@ class User_model extends CI_Model {
                 if ($user_details['password'] == sha1($current_password) && $new_password == $confirm_password) {
                     $data['password'] = sha1($new_password);
                 }else {
-                    $this->session->set_flashdata('error_message', get_phrase('mismatch_password'));
                     return;
                 }
             }
             $data['email'] = html_escape($this->input->post('email'));
             $this->db->where('id', $user_id);
             $this->db->update('users', $data);
-            $this->session->set_flashdata('flash_message', get_phrase('updated_successfully'));
-        }else {
-            $this->session->set_flashdata('error_message', get_phrase('email_duplication'));
         }
     }
 
@@ -195,14 +183,12 @@ class User_model extends CI_Model {
             if ($user_details['password'] == sha1($current_password) && $new_password == $confirm_password) {
                 $data['password'] = sha1($new_password);
             }else {
-                $this->session->set_flashdata('error_message', get_phrase('mismatch_password'));
                 return;
             }
         }
 
         $this->db->where('id', $user_id);
         $this->db->update('users', $data);
-        $this->session->set_flashdata('flash_message', get_phrase('password_updated'));
     }
 
 

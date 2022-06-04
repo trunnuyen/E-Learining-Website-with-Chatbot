@@ -45,39 +45,3 @@
   });
 </script>
 
-<!-- Toastr and alert notifications scripts -->
-<script type="text/javascript">
-function notify(message) {
-  $.NotificationApp.send("", message ,"top-right","rgba(0,0,0,0.2)","info");
-}
-
-function success_notify(message) {
-  $.NotificationApp.send("", message ,"top-right","rgba(0,0,0,0.2)","success");
-}
-
-function error_notify(message) {
-  $.NotificationApp.send("", message ,"top-right","rgba(0,0,0,0.2)","error");
-}
-
-function error_required_field() {
-  $.NotificationApp.send("", "Vui lòng điền đầy đủ thông tin" ,"top-right","rgba(0,0,0,0.2)","error");
-}
-</script>
-
-<?php if ($this->session->flashdata('info_message') != ""):?>
-<script type="text/javascript">
-  $.NotificationApp.send("", '<?php echo $this->session->flashdata("info_message");?>' ,"top-right","rgba(0,0,0,0.2)","info");
-</script>
-<?php endif;?>
-
-<?php if ($this->session->flashdata('error_message') != ""):?>
-<script type="text/javascript">
-  $.NotificationApp.send("", '<?php echo $this->session->flashdata("error_message");?>' ,"top-right","rgba(0,0,0,0.2)","error");
-</script>
-<?php endif;?>
-
-<?php if ($this->session->flashdata('flash_message') != ""):?>
-<script type="text/javascript">
-  $.NotificationApp.send("", '<?php echo $this->session->flashdata("flash_message");?>' ,"top-right","rgba(0,0,0,0.2)","success");
-</script>
-<?php endif;?>

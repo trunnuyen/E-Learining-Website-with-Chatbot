@@ -57,35 +57,35 @@
                     </div>
                     <div class="user-dashboard-content w-100 register-form hidden">
                         <div class="content-title-box">
-                            <div class="title"><?php echo get_phrase('registration_form'); ?></div>
-                            <div class="subtitle"><?php echo get_phrase('sign_up_and_start_learning'); ?>.</div>
+                            <div class="title">Đăng ký tài khoản</div>
+                            <div class="subtitle">Đăng ký tài khoản mới để truy cập vào khóa học.</div>
                         </div>
                         <form action="<?php echo site_url('login/register'); ?>" method="post">
                             <div class="content-box">
                                 <div class="basic-group">
                                     <div class="form-group">
-                                        <label for="first_name"><span class="input-field-icon"><i class="fas fa-user"></i></span> <?php echo get_phrase('first_name'); ?>:</label>
-                                        <input type="text" class="form-control" name="first_name" id="first_name" placeholder="<?php echo get_phrase('first_name'); ?>" value="" required>
+                                        <label for="first_name"><span class="input-field-icon"><i class="fas fa-user"></i> Họ:</label>
+                                        <input type="text" class="form-control" name="first_name" id="first_name" placeholder="Nhập họ của bạn" value="" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="last_name"><span class="input-field-icon"><i class="fas fa-user"></i></span> <?php echo get_phrase('last_name'); ?>:</label>
-                                        <input type="text" class="form-control" name="last_name" id="last_name" placeholder="<?php echo get_phrase('last_name'); ?>" value="" required>
+                                        <label for="last_name"><span class="input-field-icon"><i class="fas fa-user"></i> Tên:</label>
+                                        <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Nhập tên của bạn" value="" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="registration-email"><span class="input-field-icon"><i class="fas fa-envelope"></i></span> <?php echo get_phrase('email'); ?>:</label>
-                                        <input type="email" class="form-control" name="email" id="registration-email" placeholder="<?php echo get_phrase('email'); ?>" value="" required>
+                                        <label for="registration-email"><span class="input-field-icon"><i class="fas fa-envelope"></i></span> Email:</label>
+                                        <input type="email" class="form-control" name="email" id="registration-email" placeholder="Nhập email của bạn" value="" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="registration-password"><span class="input-field-icon"><i class="fas fa-lock"></i></span> <?php echo get_phrase('password'); ?>:</label>
-                                        <input type="password" class="form-control" name="password" id="registration-password" placeholder="<?php echo get_phrase('password'); ?>" value="" required>
+                                        <label for="registration-password"><span class="input-field-icon"><i class="fas fa-lock"></i></span> Mật khẩu:</label>
+                                        <input type="password" class="form-control" name="password" id="registration-password" placeholder="Nhập mật khẩu" value="" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="content-update-box">
-                                <button type="submit" class="btn"><?php echo get_phrase('sign_up'); ?></button>
+                                <button type="submit" class="btn">Đăng ký</button>
                             </div>
                             <div class="account-have text-center">
-                                <?php echo get_phrase('already_have_an_account'); ?>? <a href="javascript::" onclick="toggoleForm('login')"><?php echo get_phrase('login'); ?></a>
+                                Đã có tài khoản? <a href="javascript::" onclick="toggoleForm('login')">Đăng nhập</a>
                             </div>
                         </form>
                     </div>

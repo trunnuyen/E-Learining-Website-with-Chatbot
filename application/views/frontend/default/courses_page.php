@@ -142,32 +142,6 @@ if (isset($sub_category_id)) {
                             </div>
                             <hr>
             
-                            <div class="filter_type">
-                                <h6>Đánh giá</h6>
-                                <ul>
-                                    <li>
-                                        <div class="">
-                                            <input type="radio" id="all_rating" name="rating" class="ratings custom-radio" value="<?php echo 'all'; ?>" onclick="filter(this)" <?php if($selected_rating == "all") echo 'checked'; ?>>
-                                            <label for="all_rating">Tất cả</label>
-                                        </div>
-                                    </li>
-                                    <?php for($i = 1; $i <= 5; $i++): ?>
-                                        <li>
-                                            <div class="">
-                                                <input type="radio" id="rating_<?php echo $i; ?>" name="rating" class="ratings custom-radio" value="<?php echo $i; ?>" onclick="filter(this)" <?php if($selected_rating == $i) echo 'checked'; ?>>
-                                                <label for="rating_<?php echo $i; ?>">
-                                                    <?php for($j = 1; $j <= $i; $j++): ?>
-                                                        <i class="fas fa-star" style="color: #f4c150;"></i>
-                                                    <?php endfor; ?>
-                                                    <?php for($j = $i; $j < 5; $j++): ?>
-                                                        <i class="far fa-star" style="color: #dedfe0;"></i>
-                                                    <?php endfor; ?>
-                                                </label>
-                                            </div>
-                                        </li>
-                                    <?php endfor; ?>
-                                </ul>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -218,11 +192,6 @@ function get_url() {
     // Get selected difficulty Level
     $('.languages:checked').each(function() {
         selectedLanguage = $(this).attr('value');
-    });
-
-    // Get selected rating
-    $('.ratings:checked').each(function() {
-        selectedRating = $(this).attr('value');
     });
 
     urlSuffix = "category="+slectedCategory+"&&price="+selectedPrice+"&&level="+selectedLevel+"&&language="+selectedLanguage+"&&rating="+selectedRating;

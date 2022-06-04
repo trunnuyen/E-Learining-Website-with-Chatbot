@@ -97,20 +97,8 @@
                                         <p class="instructors"><?php echo $top_course['short_description']; ?></p>
                                         <div class="rating">
                                             <?php
-                                            $total_rating =  $this->crud_model->get_ratings('course', $top_course['id'], true)->row()->rating;
-                                            $number_of_ratings = $this->crud_model->get_ratings('course', $top_course['id'])->num_rows();
-                                            if ($number_of_ratings > 0) {
-                                                $average_ceil_rating = ceil($total_rating / $number_of_ratings);
-                                            } else {
-                                                $average_ceil_rating = 0;
-                                            }
-
-                                            for ($i = 1; $i < 6; $i++) : ?>
-                                                <?php if ($i <= $average_ceil_rating) : ?>
-                                                    <i class="fas fa-star filled"></i>
-                                                <?php else : ?>
-                                                    <i class="fas fa-star"></i>
-                                                <?php endif; ?>
+                                            for ($i = 1; $i < 6; $i++) : ?>                                               
+                                                    <i class="fas fa-star filled"></i>                               
                                             <?php endfor; ?>
                                             <span class="d-inline-block average-rating"><?php echo $average_ceil_rating; ?></span>
                                         </div>
@@ -210,28 +198,11 @@
                                         <img src="<?php echo $this->crud_model->get_course_thumbnail_url($latest_course['id']); ?>" alt="" class="img-fluid">
                                     </div>
                                     <div class="course-details">
-                                        <h5 class="title"><?php echo $latest_course['title']; ?></h5>
-                                        <p class="instructors">
-                                            <?php
-                                            $instructor_details = $this->user_model->get_all_user($latest_course['user_id'])->row_array();
-                                            echo $instructor_details['first_name'] . ' ' . $instructor_details['last_name']; ?>
-                                        </p>
+                                        <h5 class="title"><?php echo $latest_course['title']; ?></h5>                                      
                                         <div class="rating">
-                                            <?php
-                                            $total_rating =  $this->crud_model->get_ratings('course', $latest_course['id'], true)->row()->rating;
-                                            $number_of_ratings = $this->crud_model->get_ratings('course', $latest_course['id'])->num_rows();
-                                            if ($number_of_ratings > 0) {
-                                                $average_ceil_rating = ceil($total_rating / $number_of_ratings);
-                                            } else {
-                                                $average_ceil_rating = 0;
-                                            }
-
-                                            for ($i = 1; $i < 6; $i++) : ?>
-                                                <?php if ($i <= $average_ceil_rating) : ?>
-                                                    <i class="fas fa-star filled"></i>
-                                                <?php else : ?>
-                                                    <i class="fas fa-star"></i>
-                                                <?php endif; ?>
+                                            <?php                               
+                                            for ($i = 1; $i < 6; $i++) : ?>                                               
+                                                    <i class="fas fa-star filled"></i>                                               
                                             <?php endfor; ?>
                                             <span class="d-inline-block average-rating"><?php echo $average_ceil_rating; ?></span>
                                         </div>
@@ -271,28 +242,11 @@
                                         <img src="<?php echo $this->crud_model->get_course_thumbnail_url($latest_course['id']); ?>" alt="" class="img-fluid">
                                     </div>
                                     <div class="course-details">
-                                        <h5 class="title"><?php echo $latest_course['title']; ?></h5>
-                                        <p class="instructors">
-                                            <?php
-                                            $instructor_details = $this->user_model->get_all_user($latest_course['user_id'])->row_array();
-                                            echo $instructor_details['first_name'] . ' ' . $instructor_details['last_name']; ?>
-                                        </p>
+                                        <h5 class="title"><?php echo $latest_course['title']; ?></h5>                                      
                                         <div class="rating">
-                                            <?php
-                                            $total_rating =  $this->crud_model->get_ratings('course', $latest_course['id'], true)->row()->rating;
-                                            $number_of_ratings = $this->crud_model->get_ratings('course', $latest_course['id'])->num_rows();
-                                            if ($number_of_ratings > 0) {
-                                                $average_ceil_rating = ceil($total_rating / $number_of_ratings);
-                                            } else {
-                                                $average_ceil_rating = 0;
-                                            }
-
-                                            for ($i = 1; $i < 6; $i++) : ?>
-                                                <?php if ($i <= $average_ceil_rating) : ?>
-                                                    <i class="fas fa-star filled"></i>
-                                                <?php else : ?>
-                                                    <i class="fas fa-star"></i>
-                                                <?php endif; ?>
+                                            <?php                                   
+                                            for ($i = 1; $i < 6; $i++) : ?>                                             
+                                                    <i class="fas fa-star filled"></i>                                             
                                             <?php endfor; ?>
                                             <span class="d-inline-block average-rating"><?php echo $average_ceil_rating; ?></span>
                                         </div>
